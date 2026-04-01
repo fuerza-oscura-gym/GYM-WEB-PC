@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1D9E75">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Fuerza Oscura Gym</title>
+<style>
+:root{--green:#1D9E75;--green-dark:#0F6E56;--green-bg:#E1F5EE;--green-text:#085041;--red:#E24B4A;--red-bg:#FCEBEB;--red-text:#501313;--amber:#BA7517;--amber-bg:#FAEEDA;--amber-text:#412402;--blue-bg:#E6F1FB;--blue-text:#0C447C;--bg:#fff;--bg2:#f5f5f3;--bg3:#eeede9;--text:#1a1a18;--text2:#6b6b67;--text3:#9a9a96;--border:rgba(0,0,0,0.1);--border2:rgba(0,0,0,0.18);--r:8px;--rl:12px;}
+@media(prefers-color-scheme:dark){:root{--bg:#1c1c1a;--bg2:#252523;--bg3:#2e2e2b;--text:#f0ede8;--text2:#a8a8a4;--text3:#6b6b67;--border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.18);--green-bg:#04342C;--green-text:#9FE1CB;--red-bg:#501313;--red-text:#F7C1C1;--amber-bg:#412402;--amber-text:#FAC775;--blue-bg:#042C53;--blue-text:#B5D4F4;}}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);color:var(--text);min-height:100vh;}
+.layout{display:grid;grid-template-columns:220px 1fr;min-height:100vh;}
+.sidebar{background:var(--bg);border-right:0.5px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;width:220px;height:100vh;overflow-y:auto;}
+.main-wrap{margin-left:220px;display:flex;flex-direction:column;min-height:100vh;}
+.topbar{background:var(--bg);border-bottom:0.5px solid var(--border);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:10;}
+.topbar h2{font-size:15px;font-weight:500;}
+.main{padding:1.5rem;flex:1;}
+.brand{padding:1.25rem 1.25rem 1rem;border-bottom:0.5px solid var(--border);}
+.brand h1{font-size:15px;font-weight:500;}
+.brand p{font-size:11px;color:var(--text2);margin-top:2px;}
+.nav-section{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;padding:12px 1.25rem 4px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 1.25rem;font-size:13px;color:var(--text2);cursor:pointer;border-left:2px solid transparent;}
+.nav-item:hover{background:var(--bg2);color:var(--text);}
+.nav-item.active{color:var(--green);background:var(--green-bg);border-left-color:var(--green);font-weight:500;}
+.sidebar-footer{margin-top:auto;padding:1rem 1.25rem;border-top:0.5px solid var(--border);}
+.save-ind{font-size:11px;color:var(--green);opacity:0;transition:opacity 0.4s;}
+.save-ind.show{opacity:1;}
+.section{display:none;}.section.active{display:block;}
+.metrics-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:1.5rem;}
+.metric{background:var(--bg2);border-radius:var(--r);padding:1rem 1.25rem;}
+.metric .lbl{font-size:11px;color:var(--text2);margin-bottom:6px;}
+.metric .val{font-size:26px;font-weight:500;}
+.metric .val.g{color:var(--green);} .metric .val.r{color:var(--red);} .metric .val.a{color:var(--amber);}
+.alerta{border-radius:var(--r);padding:10px 14px;margin-bottom:10px;font-size:13px;display:none;}
+.alerta.show{display:block;}
+.alerta.warn{background:var(--amber-bg);color:var(--amber-text);border:0.5px solid var(--amber);}
+.alerta.danger{background:var(--red-bg);color:var(--red-text);border:0.5px solid var(--red);}
+.alerta ul{margin:4px 0 0 16px;} .alerta li{margin-bottom:2px;}
+.card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);padding:1.25rem;margin-bottom:1rem;}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+.card-hdr h3{font-size:14px;font-weight:500;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;}
+table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed;}
+th{text-align:left;color:var(--text2);font-weight:400;font-size:11px;padding:0 10px 8px;border-bottom:0.5px solid var(--border);text-transform:uppercase;letter-spacing:0.03em;}
+td{padding:10px;border-bottom:0.5px solid var(--border);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+tr:last-child td{border-bottom:none;} tr:hover td{background:var(--bg2);}
+.badge{display:inline-block;font-size:11px;padding:3px 8px;border-radius:var(--r);font-weight:500;}
+.badge.ok{background:var(--green-bg);color:var(--green-text);}
+.badge.vencido{background:var(--red-bg);color:var(--red-text);}
+.badge.proximo{background:var(--amber-bg);color:var(--amber-text);}
+.badge.neutral{background:var(--bg2);color:var(--text2);}
+.badge.agotado{background:var(--red-bg);color:var(--red-text);}
+.badge.pocas{background:var(--amber-bg);color:var(--amber-text);}
+.badge.pagado{background:var(--green-bg);color:var(--green-text);}
+.plan-pill{font-size:11px;padding:2px 8px;border-radius:var(--r);background:var(--blue-bg);color:var(--blue-text);}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--blue-bg);display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--blue-text);flex-shrink:0;}
+.btn{font-size:12px;padding:5px 12px;border-radius:var(--r);border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;}
+.btn:hover{background:var(--bg2);}
+.btn.primary{background:var(--green);color:white;border-color:var(--green-dark);font-size:13px;padding:7px 16px;}
+.btn.danger{color:var(--red);border-color:var(--red-bg);}
+.btn.success{color:var(--green);border-color:var(--green-bg);}
+.cc{display:flex;align-items:center;gap:5px;}
+.cc button{width:20px;height:20px;border-radius:50%;border:0.5px solid var(--border2);background:transparent;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;color:var(--text2);}
+.cc-num{font-size:12px;font-weight:500;min-width:30px;text-align:center;}
+.prog{width:48px;height:4px;background:var(--bg2);border-radius:99px;overflow:hidden;display:inline-block;vertical-align:middle;}
+.prog-fill{height:100%;border-radius:99px;}
+.hf-tag{font-size:11px;padding:2px 8px;border-radius:99px;background:var(--blue-bg);color:var(--blue-text);border:0.5px solid var(--blue-text);display:inline-flex;align-items:center;gap:4px;margin:2px;}
+.hf-tag button{background:none;border:none;cursor:pointer;color:var(--red);font-size:11px;padding:0;line-height:1;}
+.field{margin-bottom:10px;}
+.field label{font-size:11px;color:var(--text2);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.03em;}
+input,select{font-size:13px;padding:7px 10px;border-radius:var(--r);border:0.5px solid var(--border2);background:var(--bg2);color:var(--text);width:100%;}
+input[type=number]{width:70px;}
+.detail-panel{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);padding:1.25rem;}
+.hist-row{display:flex;align-items:center;gap:10px;padding:10px;border-bottom:0.5px solid var(--border);cursor:pointer;border-radius:var(--r);}
+.hist-row:hover{background:var(--bg2);}
+.hist-row:last-child{border-bottom:none;}
+.tl-item{display:flex;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border);align-items:flex-start;}
+.tl-item:last-child{border-bottom:none;}
+.tl-dot{width:8px;height:8px;border-radius:50%;background:var(--green);margin-top:5px;flex-shrink:0;}
+.renov-prev{font-size:12px;color:var(--green);margin-top:6px;display:none;}
+.semana{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;}
+.dia-col{background:var(--bg2);border-radius:var(--r);padding:10px;}
+.dia-col h4{font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;display:flex;align-items:center;gap:4px;}
+.hoy-tag{font-size:9px;background:var(--blue-bg);color:var(--blue-text);padding:1px 5px;border-radius:99px;}
+.slot{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r);padding:8px;margin-bottom:5px;cursor:pointer;}
+.slot:hover{border-color:var(--border2);}
+.slot.sel{border-color:var(--green);border-width:1.5px;}
+.slot-hora{font-size:13px;font-weight:500;}
+.slot-info{font-size:10px;color:var(--text2);margin-top:1px;}
+.slot-nombres{font-size:10px;color:var(--blue-text);margin-top:2px;white-space:normal;line-height:1.3;}
+.cupos-editor{display:flex;align-items:center;gap:10px;background:var(--bg2);border-radius:var(--r);padding:10px 12px;margin-bottom:12px;}
+.cupos-editor label{font-size:12px;color:var(--text2);flex:1;}
+.cupos-bar{height:5px;border-radius:99px;background:var(--bg2);border:0.5px solid var(--border);overflow:hidden;margin-bottom:12px;}
+.cupos-bar-fill{height:100%;border-radius:99px;background:var(--green);transition:width 0.3s;}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.bar-lbl{font-size:12px;color:var(--text2);width:80px;text-align:right;flex-shrink:0;}
+.bar-track{flex:1;height:20px;background:var(--bg2);border-radius:var(--r);overflow:hidden;}
+.bar-fill{height:100%;background:var(--green);border-radius:var(--r);}
+.bar-val{font-size:12px;font-weight:500;width:80px;flex-shrink:0;}
+.chart6{display:flex;align-items:flex-end;gap:8px;height:120px;}
+.c6col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;height:100%;}
+.c6bar{width:100%;border-radius:4px 4px 0 0;background:var(--bg2);border:0.5px solid var(--border);}
+.c6bar.act{background:var(--green);border-color:var(--green-dark);}
+.c6mes{font-size:11px;color:var(--text2);}
+.mes-nav{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.mes-nav h3{font-size:14px;font-weight:500;flex:1;text-align:center;}
+.mes-nav button{padding:4px 12px;border-radius:var(--r);border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-size:14px;}
+.empty{text-align:center;padding:2rem;color:var(--text3);font-size:13px;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:200;align-items:flex-start;justify-content:center;padding-top:80px;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--bg);border-radius:var(--rl);border:0.5px solid var(--border2);padding:1.5rem;width:440px;max-height:85vh;overflow-y:auto;}
+.modal-box h3{font-size:15px;font-weight:500;margin-bottom:1rem;}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:1rem;}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand"><h1>Fuerza Oscura Gym</h1><p>Panel de gestión</p></div>
+    <span class="nav-section">Principal</span>
+    <div class="nav-item active" onclick="showSection('socios',this)">👥 Socios</div>
+    <div class="nav-item" onclick="showSection('pagos',this)">💳 Pagos</div>
+    <div class="nav-item" onclick="showSection('historial',this)">📋 Historial</div>
+    <div class="nav-item" onclick="showSection('resumen',this)">📊 Resumen mensual</div>
+    <span class="nav-section">Gestión</span>
+    <div class="nav-item" onclick="showSection('asistencia',this)">✅ Asistencia</div>
+    <div class="nav-item" onclick="showSection('horarios',this)">🕐 Horarios</div>
+    <div class="sidebar-footer"><span class="save-ind" id="save-ind">Guardado</span></div>
+  </aside>
+
+  <div class="main-wrap">
+    <header class="topbar">
+      <h2 id="topbar-title">Socios</h2>
+      <button class="btn primary" onclick="openModal()">+ Nuevo socio</button>
+    </header>
+    <main class="main">
+
+      <div id="alerta-proximo" class="alerta warn"><strong>Por vencer en 3 días:</strong><ul id="lista-proximos"></ul></div>
+      <div id="alerta-vencido" class="alerta danger"><strong>Membresías vencidas:</strong><ul id="lista-vencidos"></ul></div>
+      <div id="alerta-clases" class="alerta warn"><strong>Clases agotadas o casi agotadas:</strong><ul id="lista-clases-alert"></ul></div>
+
+      <div id="sec-socios" class="section active">
+        <div class="metrics-grid">
+          <div class="metric"><div class="lbl">Total socios</div><div class="val" id="m-total">0</div></div>
+          <div class="metric"><div class="lbl">Al día</div><div class="val g" id="m-aldía">0</div></div>
+          <div class="metric"><div class="lbl">Por vencer</div><div class="val a" id="m-proximos">0</div></div>
+          <div class="metric"><div class="lbl">Vencidos</div><div class="val r" id="m-vencidos">0</div></div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><h3>Lista de socios</h3><input type="text" id="buscador" placeholder="Buscar socio..." style="width:220px" oninput="renderSocios()"></div>
+          <table>
+            <colgroup><col style="width:4%"><col style="width:20%"><col style="width:12%"><col style="width:11%"><col style="width:11%"><col style="width:17%"><col style="width:17%"><col style="width:8%"></colgroup>
+            <thead><tr><th></th><th>Nombre</th><th>Plan</th><th>Vence</th><th>Estado</th><th>Clases</th><th>Horarios fijos</th><th>Acción</th></tr></thead>
+            <tbody id="tabla-socios"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="sec-pagos" class="section">
+        <div class="metrics-grid">
+          <div class="metric"><div class="lbl">Total socios</div><div class="val" id="m-total2">0</div></div>
+          <div class="metric"><div class="lbl">Pagados</div><div class="val g" id="m-pagados">0</div></div>
+          <div class="metric"><div class="lbl">Pendientes</div><div class="val a" id="m-pendientes">0</div></div>
+          <div class="metric"><div class="lbl">Ingresos cobrados</div><div class="val g" id="m-ingresos">$0</div></div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><h3>Registro de pagos</h3><span style="font-size:13px;color:var(--text2)" id="ingresos-total"></span></div>
+          <table>
+            <colgroup><col style="width:4%"><col style="width:24%"><col style="width:14%"><col style="width:13%"><col style="width:13%"><col style="width:13%"><col style="width:19%"></colgroup>
+            <thead><tr><th></th><th>Nombre</th><th>Plan</th><th>Vence</th><th>Estado</th><th>Monto</th><th>Pago</th></tr></thead>
+            <tbody id="tabla-pagos"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="sec-historial" class="section">
+        <div class="two-col" style="align-items:start">
+          <div class="card" style="margin-bottom:0">
+            <div class="card-hdr"><h3>Socios</h3></div>
+            <div id="hist-lista"></div>
+          </div>
+          <div class="detail-panel" id="hist-detalle" style="display:none">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem">
+              <div class="avatar" id="hist-avatar" style="width:40px;height:40px;font-size:14px"></div>
+              <div style="flex:1"><div style="font-size:14px;font-weight:500" id="hist-nombre"></div><div style="font-size:12px;color:var(--text2)" id="hist-sub"></div></div>
+              <div style="text-align:right"><div style="font-size:11px;color:var(--text2)">Total pagado</div><div style="font-size:16px;font-weight:500;color:var(--green)" id="hist-total"></div></div>
+            </div>
+            <div style="background:var(--bg2);border-radius:var(--r);padding:12px;margin-bottom:12px">
+              <div style="font-size:13px;font-weight:500;margin-bottom:10px">Registrar pago <span class="badge pagado" style="font-size:10px">Renueva auto</span></div>
+              <div class="field"><label>Plan</label><select id="hp-plan"><option value="8 clases">8 clases — $40.000</option><option value="12 clases">12 clases — $65.000</option><option value="20 clases">20 clases — $90.000</option></select></div>
+              <div style="display:flex;gap:8px"><div class="field" style="flex:1"><label>Fecha</label><input type="date" id="hp-fecha"></div><div class="field" style="flex:1"><label>Nota</label><input type="text" id="hp-nota" placeholder="Opcional..."></div></div>
+              <div class="renov-prev" id="hp-preview"></div>
+              <button class="btn primary" style="width:100%;margin-top:8px" onclick="registrarPago()">Registrar pago</button>
+            </div>
+            <p style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.03em;margin-bottom:8px">Historial</p>
+            <div id="hist-timeline"></div>
+            <div class="empty" id="hist-empty" style="display:none">Sin pagos aún.</div>
+          </div>
+          <div class="detail-panel" id="hist-empty-panel" style="display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:13px">Seleccioná un socio</div>
+        </div>
+      </div>
+
+      <div id="sec-resumen" class="section">
+        <div class="card">
+          <div class="mes-nav"><button onclick="cambiarMes(-1)">‹</button><h3 id="mes-titulo"></h3><button onclick="cambiarMes(1)">›</button></div>
+          <div class="three-col" style="margin-bottom:1.25rem">
+            <div class="metric"><div class="lbl">Ingresos del mes</div><div class="val g" id="res-ingresos">$0</div></div>
+            <div class="metric"><div class="lbl">Pagos registrados</div><div class="val" id="res-pagos">0</div></div>
+            <div class="metric"><div class="lbl">Socios activos</div><div class="val" id="res-activos">0</div></div>
+          </div>
+          <div class="two-col">
+            <div>
+              <p style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.03em;margin-bottom:10px">Ingresos por plan</p>
+              <div id="res-barras" style="margin-bottom:1.25rem"></div>
+              <p style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.03em;margin-bottom:6px">Últimos 6 meses</p>
+              <div class="chart6" id="chart-6m"></div>
+            </div>
+            <div>
+              <p style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.03em;margin-bottom:10px">Detalle de pagos</p>
+              <div id="res-detalle"></div>
+              <div class="empty" id="res-empty" style="display:none">Sin pagos este mes.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="sec-asistencia" class="section">
+        <div class="card">
+          <div class="card-hdr"><h3>Asistencia de hoy</h3><span style="font-size:12px;color:var(--text2)" id="fecha-hoy"></span></div>
+          <table>
+            <colgroup><col style="width:4%"><col style="width:26%"><col style="width:14%"><col style="width:18%"><col style="width:16%"><col style="width:22%"></colgroup>
+            <thead><tr><th></th><th>Socio</th><th>Plan</th><th>Horario hoy</th><th>Clases restantes</th><th>Acción</th></tr></thead>
+            <tbody id="tabla-asistencia"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="sec-horarios" class="section">
+        <div class="card">
+          <div class="card-hdr"><h3>Horarios semanales</h3><span style="font-size:12px;color:var(--text2)">Clic en un horario para editar</span></div>
+          <div class="semana" id="semana-grid"></div>
+        </div>
+        <div class="card" id="slot-detalle-card" style="display:none">
+          <div class="card-hdr"><div><h3 id="slot-titulo"></h3><p style="font-size:12px;color:var(--text2);margin-top:2px" id="slot-sub"></p></div><button class="btn" onclick="cerrarSlot()">Cerrar</button></div>
+          <div class="two-col">
+            <div>
+              <div class="cupos-editor"><label>Cupos disponibles</label><input type="number" id="cupos-input" min="1" max="100" style="width:70px;text-align:center;font-weight:500" oninput="actualizarCupos()"></div>
+              <div class="cupos-bar"><div class="cupos-bar-fill" id="cupos-bar-fill"></div></div>
+              <p style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.03em;margin-bottom:8px">Socios con este horario fijo</p>
+              <div id="slot-fijos-list" style="margin-bottom:12px;min-height:32px"></div>
+              <button class="btn danger" onclick="eliminarSlotActivo()">Eliminar este horario</button>
+            </div>
+            <div>
+              <p style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.03em;margin-bottom:8px">Asignar socio</p>
+              <div style="display:flex;gap:8px;margin-bottom:14px"><select id="sel-asignar" style="flex:1"></select><button class="btn primary" onclick="asignarFijoDesdeSlot()">Asignar</button></div>
+              <p style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.03em;margin-bottom:8px">Agregar hora al día</p>
+              <div id="add-hora-row"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalBg(event)">
+  <div class="modal-box">
+    <h3 id="modal-titulo">Nuevo socio</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="field" style="grid-column:1/3"><label>Nombre completo</label><input id="f-nombre" type="text" placeholder="Juan Pérez"></div>
+      <div class="field"><label>Teléfono</label><input id="f-tel" type="text" placeholder="+56 9 ..."></div>
+      <div class="field"><label>Plan</label><select id="f-plan" onchange="onPlanChange()"><option value="8 clases">8 clases — $40.000 (2/sem)</option><option value="12 clases">12 clases — $65.000 (3/sem)</option><option value="20 clases">20 clases — $90.000 (5/sem)</option></select></div>
+      <div class="field" style="grid-column:1/3"><label>Fecha de vencimiento</label><input id="f-vence" type="date"></div>
+    </div>
+    <div class="field">
+      <label>Horarios fijos semanales <span id="hf-counter" style="font-weight:400;color:var(--text2)"></span></label>
+      <div id="hf-asignados" style="margin-bottom:8px;min-height:24px"></div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <select id="f-dia" style="flex:1" onchange="poblarHoras()"><option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option><option>Sábado</option></select>
+        <select id="f-hora" style="flex:1"></select>
+        <button class="btn primary" id="btn-hf-add" onclick="addHF()">+ Agregar</button>
+      </div>
+    </div>
+    <div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="guardarSocio()">Guardar socio</button></div>
+  </div>
+</div>
+
+<script>
+const PLANES={'8 clases':{precio:40000,total:8,dias:30,sem:2},'12 clases':{precio:65000,total:12,dias:30,sem:3},'20 clases':{precio:90000,total:20,dias:30,sem:5}};
+const DIAS_ALERTA=3,SK='fog_gym_v5';
+const DIAS=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const HD={'Lunes':[{hora:'06:00',cupos:15},{hora:'22:00',cupos:15}],'Martes':[{hora:'06:00',cupos:15},{hora:'22:00',cupos:15}],'Miércoles':[{hora:'06:00',cupos:15},{hora:'22:00',cupos:15}],'Jueves':[{hora:'06:00',cupos:15},{hora:'22:00',cupos:15}],'Viernes':[{hora:'06:00',cupos:15},{hora:'22:00',cupos:15}],'Sábado':[{hora:'09:00',cupos:15},{hora:'13:00',cupos:15}]};
+let socios=[],asistencias={},horarios={},historialPagos={},hFijos={};
+let editId=null,histSocioId=null,slotActivo=null,mesVista={y:new Date().getFullYear(),m:new Date().getMonth()};
+let tmpHF=[];
+
+function load(){try{const s=localStorage.getItem(SK);if(s){const d=JSON.parse(s);socios=d.socios||[];horarios=d.horarios||JSON.parse(JSON.stringify(HD));historialPagos=d.historialPagos||{};hFijos=d.hFijos||{};}else{socios=[];horarios=JSON.parse(JSON.stringify(HD));historialPagos={};hFijos={};}}catch(e){socios=[];horarios=JSON.parse(JSON.stringify(HD));historialPagos={};hFijos={};}}
+function save(){try{localStorage.setItem(SK,JSON.stringify({socios,horarios,historialPagos,hFijos}));const i=document.getElementById('save-ind');if(i){i.classList.add('show');setTimeout(()=>i.classList.remove('show'),1800);}}catch(e){}}
+function hoy(){return new Date().toISOString().split('T')[0];}
+function dr(v){return Math.ceil((new Date(v)-new Date(hoy()))/86400000);}
+function est(v){const d=dr(v);return d<0?'vencido':d<=DIAS_ALERTA?'proximo':'ok';}
+function estL(s){return s==='ok'?'Al día':s==='proximo'?'Por vencer':'Vencido';}
+function ini(n){return n.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();}
+function fmt(n){return '$'+n.toLocaleString('es-CL');}
+function cr(s){return Math.max(0,PLANES[s.plan].total-(s.cu||0));}
+function ce(s){const r=cr(s);return r===0?'agotado':r<=2?'pocas':'ok';}
+function bc(s){return ce(s)==='agotado'?'#E24B4A':ce(s)==='pocas'?'#BA7517':'#1D9E75';}
+function tpS(id){return(historialPagos[id]||[]).reduce((a,p)=>a+p.monto,0);}
+function dhn(){return{1:'Lunes',2:'Martes',3:'Miércoles',4:'Jueves',5:'Viernes',6:'Sábado'}[new Date().getDay()]||null;}
+function addD(f,d){const x=new Date(f+'T12:00:00');x.setDate(x.getDate()+d);return x.toISOString().split('T')[0];}
+function calcNF(s,plan,fecha){return addD(s.vence>hoy()?s.vence:fecha,PLANES[plan].dias);}
+function getFijosSlot(dia,hora){return socios.filter(s=>(hFijos[s.id]||[]).some(f=>f.dia===dia&&f.hora===hora));}
+function getSlot(dia,hora){return(horarios[dia]||[]).find(s=>s.hora===hora);}
+function allPagos(){const l=[];Object.entries(historialPagos).forEach(([id,pg])=>{const s=socios.find(x=>x.id===parseInt(id));if(!s)return;pg.forEach(p=>l.push({...p,sn:s.nombre,sid:parseInt(id)}));});return l;}
+function pgMes(y,m){return allPagos().filter(p=>{const d=new Date(p.fecha+'T12:00:00');return d.getFullYear()===y&&d.getMonth()===m;});}
+function cambiarMes(d){mesVista.m+=d;if(mesVista.m<0){mesVista.m=11;mesVista.y--;}if(mesVista.m>11){mesVista.m=0;mesVista.y++;}renderResumen();}
+function cambiarClases(id,delta){const s=socios.find(x=>x.id===id);if(!s)return;s.cu=Math.min(PLANES[s.plan].total,Math.max(0,(s.cu||0)+delta));save();renderAll();}
+function togglePago(id){const s=socios.find(x=>x.id===id);if(s){s.pagado=!s.pagado;save();renderAll();}}
+function toggleAsistencia(id){asistencias[id]=!asistencias[id];if(asistencias[id]){const s=socios.find(x=>x.id===id);if(s&&(s.cu||0)<PLANES[s.plan].total){s.cu=(s.cu||0)+1;save();}}renderAll();}
+
+function renderAlertas(){const pr=socios.filter(s=>est(s.vence)==='proximo'),ve=socios.filter(s=>est(s.vence)==='vencido'),sc=socios.filter(s=>ce(s)!=='ok');const bP=document.getElementById('alerta-proximo'),bV=document.getElementById('alerta-vencido'),bC=document.getElementById('alerta-clases');if(pr.length){document.getElementById('lista-proximos').innerHTML=pr.map(s=>{const d=dr(s.vence);return'<li>'+s.nombre+' — '+d+' día'+(d===1?'':'s')+'</li>';}).join('');bP.classList.add('show');}else bP.classList.remove('show');if(ve.length){document.getElementById('lista-vencidos').innerHTML=ve.map(s=>'<li>'+s.nombre+' — venció el '+s.vence+'</li>').join('');bV.classList.add('show');}else bV.classList.remove('show');if(sc.length){document.getElementById('lista-clases-alert').innerHTML=sc.map(s=>{const r=cr(s);return'<li>'+s.nombre+' — '+(r===0?'agotadas':r+' restante'+(r===1?'':'s'))+'</li>';}).join('');bC.classList.add('show');}else bC.classList.remove('show');}
+
+function renderMetrics(){document.getElementById('m-total').textContent=socios.length;document.getElementById('m-aldía').textContent=socios.filter(s=>est(s.vence)==='ok').length;document.getElementById('m-proximos').textContent=socios.filter(s=>est(s.vence)==='proximo').length;document.getElementById('m-vencidos').textContent=socios.filter(s=>est(s.vence)==='vencido').length;document.getElementById('m-total2').textContent=socios.length;document.getElementById('m-pagados').textContent=socios.filter(s=>s.pagado).length;document.getElementById('m-pendientes').textContent=socios.filter(s=>!s.pagado).length;const ingMes=pgMes(new Date().getFullYear(),new Date().getMonth()).reduce((a,p)=>a+p.monto,0);document.getElementById('m-ingresos').textContent=fmt(ingMes);}
+
+function renderSocios(){const q=(document.getElementById('buscador').value||'').toLowerCase();const fil=socios.filter(s=>s.nombre.toLowerCase().includes(q));const tbody=document.getElementById('tabla-socios');tbody.innerHTML='';if(!fil.length){tbody.innerHTML='<tr><td colspan="8" class="empty">No hay socios aún.</td></tr>';return;}fil.forEach(s=>{const st=est(s.vence),tot=PLANES[s.plan].total,cu=s.cu||0,pct=Math.round(cu/tot*100),cSt=ce(s);const fijos=(hFijos[s.id]||[]);const tr=document.createElement('tr');tr.innerHTML='<td><div class="avatar">'+ini(s.nombre)+'</div></td><td style="font-weight:500">'+s.nombre+'</td><td><span class="plan-pill">'+s.plan+'</span></td><td style="color:var(--text2)">'+s.vence+'</td><td><span class="badge '+st+'">'+estL(st)+'</span></td><td><div class="cc"><button onclick="cambiarClases('+s.id+',-1)">−</button><span class="cc-num">'+cu+'/'+tot+'</span><button onclick="cambiarClases('+s.id+',1)">+</button><div class="prog"><div class="prog-fill" style="width:'+pct+'%;background:'+bc(s)+'"></div></div>'+(cSt!=='ok'?'<span class="badge '+cSt+'" style="font-size:10px">'+(cSt==='agotado'?'Ag':cr(s)+'r')+'</span>':'')+'</div></td><td style="white-space:normal;line-height:1.6">'+(fijos.length?fijos.map(f=>'<span class="hf-tag" style="font-size:10px;padding:1px 6px;margin:1px">'+f.dia.substring(0,3)+' '+f.hora+'</span>').join(''):'<span style="color:var(--text3);font-size:12px">—</span>')+'</td><td><button class="btn" onclick="openModal('+s.id+')">Editar</button></td>';tbody.appendChild(tr);});}
+
+function renderPagos(){const tbody=document.getElementById('tabla-pagos');tbody.innerHTML='';let total=0;socios.forEach(s=>{const st=est(s.vence);if(s.pagado)total+=PLANES[s.plan].precio;const tr=document.createElement('tr');tr.innerHTML='<td><div class="avatar">'+ini(s.nombre)+'</div></td><td style="font-weight:500">'+s.nombre+'</td><td><span class="plan-pill">'+s.plan+'</span></td><td>'+s.vence+'</td><td><span class="badge '+st+'">'+estL(st)+'</span></td><td>'+fmt(PLANES[s.plan].precio)+'</td><td><button class="btn'+(s.pagado?' success':'')+'" onclick="togglePago('+s.id+')" style="'+(s.pagado?'color:var(--green);border-color:var(--green-bg)':'')+'">'+(s.pagado?'Pagado ✓':'Registrar pago')+'</button></td>';tbody.appendChild(tr);});document.getElementById('ingresos-total').textContent='Total cobrado: '+fmt(total);}
+
+function renderAsistencia(){document.getElementById('fecha-hoy').textContent=new Date().toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long',year:'numeric'});const hoyN=dhn();const tbody=document.getElementById('tabla-asistencia');tbody.innerHTML='';socios.forEach(s=>{const presente=!!asistencias[s.id],r=cr(s);const fijosHoy=(hFijos[s.id]||[]).filter(f=>f.dia===hoyN).map(f=>f.hora).join(', ')||'—';const tr=document.createElement('tr');tr.innerHTML='<td><div class="avatar">'+ini(s.nombre)+'</div></td><td style="font-weight:500">'+s.nombre+'</td><td><span class="plan-pill">'+s.plan+'</span></td><td style="color:var(--blue-text)">'+fijosHoy+'</td><td><span class="badge '+(ce(s)==='ok'?'neutral':ce(s))+'">'+r+' restante'+(r===1?'':'s')+'</span></td><td><div style="display:flex;gap:8px;align-items:center"><span class="badge '+(presente?'ok':'neutral')+'">'+(presente?'Presente':'Ausente')+'</span><button class="btn" onclick="toggleAsistencia('+s.id+')">'+(presente?'Desmarcar':'Marcar presente')+'</button></div></td>';tbody.appendChild(tr);});}
+
+function renderSemana(){const grid=document.getElementById('semana-grid'),hoyN=dhn();grid.innerHTML='';DIAS.forEach(dia=>{const slots=horarios[dia]||[],esHoy=dia===hoyN;const col=document.createElement('div');col.className='dia-col';let html='<h4>'+dia+(esHoy?'<span class="hoy-tag">hoy</span>':'')+'</h4>';slots.forEach(slot=>{const fijos=getFijosSlot(dia,slot.hora),lleno=fijos.length>=slot.cupos,isSel=slotActivo&&slotActivo.dia===dia&&slotActivo.hora===slot.hora;html+='<div class="slot'+(isSel?' sel':'')+'" onclick="verSlot(\''+dia+'\',\''+slot.hora+'\')"><div style="display:flex;justify-content:space-between;align-items:center"><div class="slot-hora">'+slot.hora+'</div><span class="badge '+(lleno?'vencido':'ok')+'" style="font-size:9px">'+fijos.length+'/'+slot.cupos+'</span></div>'+(fijos.length?'<div class="slot-nombres">'+fijos.map(s=>s.nombre.split(' ')[0]).join(', ')+'</div>':'<div class="slot-info">Sin socios</div>')+'</div>';});html+='<div style="display:flex;gap:4px;margin-top:6px"><input type="time" id="nh-'+dia+'" style="flex:1;font-size:11px;padding:4px 5px"><button class="btn" style="font-size:11px;padding:3px 7px;white-space:nowrap" onclick="agregarSlot(\''+dia+'\')">+ Hora</button></div>';col.innerHTML=html;grid.appendChild(col);});}
+
+function verSlot(dia,hora){slotActivo={dia,hora};const slot=getSlot(dia,hora);const fijos=getFijosSlot(dia,hora);const cupos=slot?slot.cupos:15;const pct=Math.min(Math.round(fijos.length/cupos*100),100);document.getElementById('slot-titulo').textContent=dia+' — '+hora;document.getElementById('slot-sub').textContent=fijos.length+' de '+cupos+' cupos ocupados';document.getElementById('cupos-input').value=cupos;const fill=document.getElementById('cupos-bar-fill');fill.style.width=pct+'%';fill.style.background=pct>=100?'#E24B4A':pct>=80?'#BA7517':'#1D9E75';const listDiv=document.getElementById('slot-fijos-list');listDiv.innerHTML='';if(!fijos.length){listDiv.innerHTML='<span style="font-size:12px;color:var(--text3)">Ningún socio asignado</span>';}else{fijos.forEach(s=>{const t=document.createElement('span');t.className='hf-tag';t.innerHTML=s.nombre+'<button onclick="quitarFijoSlot('+s.id+',\''+dia+'\',\''+hora+'\')">✕</button>';listDiv.appendChild(t);});}const sel=document.getElementById('sel-asignar');sel.innerHTML='';const noFijos=socios.filter(s=>!(hFijos[s.id]||[]).some(f=>f.dia===dia&&f.hora===hora));noFijos.forEach(s=>{const curr=(hFijos[s.id]||[]).length,max=PLANES[s.plan].sem,lleno=curr>=max;const o=document.createElement('option');o.value=s.id;o.disabled=lleno;o.textContent=s.nombre+' ('+curr+'/'+max+(lleno?' · lleno':'')+')';sel.appendChild(o);});const addRow=document.getElementById('add-hora-row');addRow.innerHTML='<input type="time" id="nh-slot" style="flex:1;font-size:13px;padding:7px 10px"><button class="btn primary" style="margin-left:8px" onclick="agregarSlotExtra(\''+dia+'\')">+ Agregar hora</button>';document.getElementById('slot-detalle-card').style.display='block';renderSemana();}
+
+function cerrarSlot(){slotActivo=null;document.getElementById('slot-detalle-card').style.display='none';renderSemana();}
+function actualizarCupos(){if(!slotActivo)return;const{dia,hora}=slotActivo;const val=Math.max(1,parseInt(document.getElementById('cupos-input').value)||1);const slot=getSlot(dia,hora);if(slot)slot.cupos=val;const fijos=getFijosSlot(dia,hora);const pct=Math.min(Math.round(fijos.length/val*100),100);document.getElementById('slot-sub').textContent=fijos.length+' de '+val+' cupos ocupados';const fill=document.getElementById('cupos-bar-fill');fill.style.width=pct+'%';fill.style.background=pct>=100?'#E24B4A':pct>=80?'#BA7517':'#1D9E75';save();renderSemana();}
+function asignarFijoDesdeSlot(){if(!slotActivo)return;const{dia,hora}=slotActivo;const id=parseInt(document.getElementById('sel-asignar').value);const s=socios.find(x=>x.id===id);if(!s)return;const max=PLANES[s.plan].sem;if(!hFijos[id])hFijos[id]=[];if(hFijos[id].length>=max){alert('Máximo '+max+' horarios para plan '+s.plan);return;}if(!hFijos[id].some(f=>f.dia===dia&&f.hora===hora))hFijos[id].push({dia,hora});save();verSlot(dia,hora);renderSocios();}
+function quitarFijoSlot(id,dia,hora){if(hFijos[id])hFijos[id]=hFijos[id].filter(f=>!(f.dia===dia&&f.hora===hora));save();verSlot(dia,hora);renderSocios();}
+function agregarSlot(dia){const input=document.getElementById('nh-'+dia),hora=input.value;if(!hora)return;if(!horarios[dia])horarios[dia]=[];if(horarios[dia].find(s=>s.hora===hora))return;horarios[dia].push({hora,cupos:15});horarios[dia].sort((a,b)=>a.hora.localeCompare(b.hora));input.value='';save();renderSemana();}
+function agregarSlotExtra(dia){const input=document.getElementById('nh-slot'),hora=input.value;if(!hora)return;if(!horarios[dia])horarios[dia]=[];if(horarios[dia].find(s=>s.hora===hora))return;horarios[dia].push({hora,cupos:15});horarios[dia].sort((a,b)=>a.hora.localeCompare(b.hora));input.value='';save();renderSemana();}
+function eliminarSlotActivo(){if(!slotActivo)return;const{dia,hora}=slotActivo;const fijos=getFijosSlot(dia,hora);if(fijos.length&&!confirm('Este horario tiene '+fijos.length+' socio(s): '+fijos.map(s=>s.nombre).join(', ')+'. ¿Eliminar?'))return;fijos.forEach(s=>{if(hFijos[s.id])hFijos[s.id]=hFijos[s.id].filter(f=>!(f.dia===dia&&f.hora===hora));});horarios[dia]=(horarios[dia]||[]).filter(s=>s.hora!==hora);save();cerrarSlot();}
+
+function renderHistorialLista(){const div=document.getElementById('hist-lista');div.innerHTML='';if(!socios.length){div.innerHTML='<div class="empty">No hay socios.</div>';return;}socios.forEach(s=>{const total=tpS(s.id),p=(historialPagos[s.id]||[]).length;const row=document.createElement('div');row.className='hist-row';row.onclick=()=>verHistSocio(s.id);row.innerHTML='<div class="avatar">'+ini(s.nombre)+'</div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500">'+s.nombre+'</div><div style="font-size:12px;color:var(--text2)">'+p+' pago'+(p===1?'':'s')+' · '+s.plan+'</div></div><div style="font-size:13px;font-weight:500;color:var(--green)">'+fmt(total)+'</div><span style="font-size:16px;color:var(--text3);margin-left:8px">›</span>';div.appendChild(row);});}
+function verHistSocio(id){histSocioId=id;const s=socios.find(x=>x.id===id);document.getElementById('hist-empty-panel').style.display='none';document.getElementById('hist-detalle').style.display='block';document.getElementById('hist-avatar').textContent=ini(s.nombre);document.getElementById('hist-nombre').textContent=s.nombre;document.getElementById('hist-sub').textContent=s.plan+' · '+s.tel;document.getElementById('hp-fecha').value=hoy();document.getElementById('hp-plan').value=s.plan;document.getElementById('hp-nota').value='';document.getElementById('hp-plan').onchange=prevRen;document.getElementById('hp-fecha').onchange=prevRen;prevRen();renderTimeline(id);}
+function prevRen(){if(!histSocioId)return;const s=socios.find(x=>x.id===histSocioId),plan=document.getElementById('hp-plan').value,fecha=document.getElementById('hp-fecha').value;const prev=document.getElementById('hp-preview');if(!fecha||!s){prev.style.display='none';return;}const nf=calcNF(s,plan,fecha);prev.style.display='block';prev.textContent='Renovará hasta '+new Date(nf+'T12:00:00').toLocaleDateString('es-CL',{day:'numeric',month:'long',year:'numeric'})+' · clases → 0/'+PLANES[plan].total;}
+function registrarPago(){if(!histSocioId)return;const plan=document.getElementById('hp-plan').value,fecha=document.getElementById('hp-fecha').value,nota=document.getElementById('hp-nota').value.trim();if(!fecha)return;const s=socios.find(x=>x.id===histSocioId);if(!s)return;const nf=calcNF(s,plan,fecha);if(s.plan!==plan){const nm=PLANES[plan].sem;if(hFijos[s.id]&&hFijos[s.id].length>nm)hFijos[s.id]=hFijos[s.id].slice(0,nm);}s.plan=plan;s.vence=nf;s.pagado=true;s.cu=0;if(!historialPagos[histSocioId])historialPagos[histSocioId]=[];historialPagos[histSocioId].unshift({id:'h'+Date.now(),plan,monto:PLANES[plan].precio,fecha,nota,ren:nf});save();prevRen();renderTimeline(histSocioId);renderAll();document.getElementById('hp-nota').value='';}
+function renderTimeline(id){const pagos=(historialPagos[id]||[]).slice().sort((a,b)=>b.fecha.localeCompare(a.fecha));document.getElementById('hist-total').textContent=fmt(tpS(id));const tl=document.getElementById('hist-timeline'),empty=document.getElementById('hist-empty');tl.innerHTML='';if(!pagos.length){empty.style.display='block';return;}empty.style.display='none';pagos.forEach(p=>{const item=document.createElement('div');item.className='tl-item';item.innerHTML='<div class="tl-dot"></div><div style="flex:1"><div style="display:flex;justify-content:space-between"><span style="font-size:13px;font-weight:500">'+p.plan+'</span><span style="font-size:13px;font-weight:500;color:var(--green)">'+fmt(p.monto)+'</span></div><div style="font-size:12px;color:var(--text2);margin-top:1px">'+new Date(p.fecha+'T12:00:00').toLocaleDateString('es-CL',{day:'numeric',month:'long',year:'numeric'})+'</div>'+(p.ren?'<div style="font-size:12px;color:var(--green);margin-top:1px">Renovado hasta: '+new Date(p.ren+'T12:00:00').toLocaleDateString('es-CL',{day:'numeric',month:'long'})+'</div>':'')+(p.nota?'<div style="font-size:12px;color:var(--text2);margin-top:1px">'+p.nota+'</div>':'')+'</div><button class="btn danger" style="align-self:center;margin-left:8px;padding:3px 8px" onclick="delPago(\''+p.id+'\')">✕</button>';tl.appendChild(item);});}
+function delPago(pid){if(!histSocioId)return;historialPagos[histSocioId]=(historialPagos[histSocioId]||[]).filter(p=>p.id!==pid);save();renderTimeline(histSocioId);}
+
+function renderResumen(){const{y,m}=mesVista;document.getElementById('mes-titulo').textContent=MESES[m]+' '+y;const pagos=pgMes(y,m),total=pagos.reduce((a,p)=>a+p.monto,0),activos=new Set(pagos.map(p=>p.sid)).size;document.getElementById('res-ingresos').textContent=fmt(total);document.getElementById('res-pagos').textContent=pagos.length;document.getElementById('res-activos').textContent=activos;const pp={'8 clases':0,'12 clases':0,'20 clases':0};pagos.forEach(p=>{if(pp[p.plan]!==undefined)pp[p.plan]+=p.monto;});const mv=Math.max(...Object.values(pp),1);const barras=document.getElementById('res-barras');barras.innerHTML='';Object.entries(pp).forEach(([plan,val])=>{const pct=Math.round(val/mv*100);const row=document.createElement('div');row.className='bar-row';row.innerHTML='<div class="bar-lbl">'+plan+'</div><div class="bar-track"><div class="bar-fill" style="width:'+pct+'%"></div></div><div class="bar-val">'+fmt(val)+'</div>';barras.appendChild(row);});const m6=[];for(let i=5;i>=0;i--){let mm=m-i,yy=y;if(mm<0){mm+=12;yy--;}m6.push({y:yy,m:mm,l:MESES[mm].substring(0,3)});}const tots=m6.map(x=>pgMes(x.y,x.m).reduce((a,p)=>a+p.monto,0));const mt=Math.max(...tots,1);const chart=document.getElementById('chart-6m');chart.innerHTML='';m6.forEach((mes,i)=>{const pct=Math.max(Math.round(tots[i]/mt*100),4),isA=mes.y===y&&mes.m===m;const col=document.createElement('div');col.className='c6col';col.innerHTML='<div style="font-size:11px;color:var(--text2)">'+(tots[i]>0?fmt(tots[i]).replace('$',''):'—')+'</div><div class="c6bar'+(isA?' act':'')+'" style="height:'+pct+'%"></div><div class="c6mes" style="font-weight:'+(isA?'500':'400')+'">'+mes.l+'</div>';chart.appendChild(col);});const det=document.getElementById('res-detalle'),emp=document.getElementById('res-empty');det.innerHTML='';if(!pagos.length){emp.style.display='block';return;}emp.style.display='none';pagos.slice().sort((a,b)=>b.fecha.localeCompare(a.fecha)).forEach(p=>{const row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border)';row.innerHTML='<div class="avatar">'+ini(p.sn)+'</div><div style="flex:1"><div style="font-size:13px;font-weight:500">'+p.sn+'</div><div style="font-size:12px;color:var(--text2)"><span class="plan-pill">'+p.plan+'</span> · '+new Date(p.fecha+'T12:00:00').toLocaleDateString('es-CL',{day:'numeric',month:'short'})+'</div></div><div style="font-size:13px;font-weight:500;color:var(--green)">'+fmt(p.monto)+'</div>';det.appendChild(row);});}
+
+function onPlanChange(){const p=document.getElementById('f-plan').value,d=new Date();d.setDate(d.getDate()+PLANES[p].dias);document.getElementById('f-vence').value=d.toISOString().split('T')[0];const max=PLANES[p].sem;if(tmpHF.length>max)tmpHF=tmpHF.slice(0,max);poblarHoras();actualizarHFUI();}
+function poblarHoras(){const dia=document.getElementById('f-dia').value,sel=document.getElementById('f-hora');sel.innerHTML='';(horarios[dia]||[]).forEach(slot=>{const o=document.createElement('option');o.value=slot.hora;o.textContent=slot.hora;sel.appendChild(o);});if(!sel.options.length){const o=document.createElement('option');o.textContent='Sin horarios';sel.appendChild(o);}}
+function actualizarHFUI(){const plan=document.getElementById('f-plan').value,max=PLANES[plan].sem;document.getElementById('hf-counter').textContent='('+tmpHF.length+'/'+max+')';document.getElementById('btn-hf-add').disabled=tmpHF.length>=max;const div=document.getElementById('hf-asignados');div.innerHTML='';if(!tmpHF.length){div.innerHTML='<p style="font-size:12px;color:var(--text3)">Sin horarios asignados</p>';return;}tmpHF.forEach((h,i)=>{const t=document.createElement('span');t.className='hf-tag';t.innerHTML=h.dia.substring(0,3)+' '+h.hora+'<button onclick="removeTmpHF('+i+')">✕</button>';div.appendChild(t);});}
+function addHF(){const plan=document.getElementById('f-plan').value,max=PLANES[plan].sem;if(tmpHF.length>=max)return;const dia=document.getElementById('f-dia').value,hora=document.getElementById('f-hora').value;if(!hora||hora==='Sin horarios')return;if(tmpHF.some(h=>h.dia===dia&&h.hora===hora))return;tmpHF.push({dia,hora});actualizarHFUI();}
+function removeTmpHF(i){tmpHF.splice(i,1);actualizarHFUI();}
+function openModal(id){editId=id||null;document.getElementById('modal-titulo').textContent=editId?'Editar socio':'Nuevo socio';if(editId){const s=socios.find(x=>x.id===editId);document.getElementById('f-nombre').value=s.nombre;document.getElementById('f-tel').value=s.tel;document.getElementById('f-plan').value=s.plan;document.getElementById('f-vence').value=s.vence;tmpHF=JSON.parse(JSON.stringify(hFijos[s.id]||[]));}else{document.getElementById('f-nombre').value='';document.getElementById('f-tel').value='';document.getElementById('f-plan').value='8 clases';const d=new Date();d.setDate(d.getDate()+30);document.getElementById('f-vence').value=d.toISOString().split('T')[0];tmpHF=[];}poblarHoras();actualizarHFUI();document.getElementById('modal-overlay').classList.add('open');}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');}
+function closeModalBg(e){if(e.target.id==='modal-overlay')closeModal();}
+function guardarSocio(){const nombre=document.getElementById('f-nombre').value.trim();if(!nombre)return;const np=document.getElementById('f-plan').value;if(editId){const s=socios.find(x=>x.id===editId);if(s.plan!==np)s.cu=0;s.nombre=nombre;s.tel=document.getElementById('f-tel').value;s.plan=np;s.vence=document.getElementById('f-vence').value;hFijos[editId]=JSON.parse(JSON.stringify(tmpHF));}else{const nid=Date.now();socios.push({id:nid,nombre,tel:document.getElementById('f-tel').value,plan:np,vence:document.getElementById('f-vence').value,pagado:false,cu:0});hFijos[nid]=JSON.parse(JSON.stringify(tmpHF));}closeModal();save();renderAll();}
+
+function showSection(id,navEl){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));document.getElementById('sec-'+id).classList.add('active');navEl.classList.add('active');const titles={socios:'Socios',pagos:'Pagos',historial:'Historial de pagos',resumen:'Resumen mensual',asistencia:'Asistencia',horarios:'Horarios semanales'};document.getElementById('topbar-title').textContent=titles[id]||id;if(id==='horarios')renderSemana();if(id==='historial'){renderHistorialLista();document.getElementById('hist-detalle').style.display='none';document.getElementById('hist-empty-panel').style.display='flex';}if(id==='resumen')renderResumen();}
+function renderAll(){renderAlertas();renderMetrics();renderSocios();renderPagos();renderAsistencia();}
+
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
+load();renderAll();
+</script>
+</body>
+</html>
