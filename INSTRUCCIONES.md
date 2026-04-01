@@ -44,7 +44,7 @@
 
 ### PASO 5 — Tu URL
 Tu app va a estar disponible en:
-**https://TU-USUARIO.github.io/fuerza-oscura-gym**
+**https://TU-USUARIO.github.io/GYM-WEB-PC**
 
 (reemplazá TU-USUARIO por tu nombre de usuario de GitHub)
 
